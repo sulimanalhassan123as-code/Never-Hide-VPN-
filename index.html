@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEVER HIDE VPN</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(180deg, #0d1b2a, #1b263b);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 25px;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .status {
+      margin: 10px 0;
+      font-size: 1rem;
+      color: #00ffcc;
+    }
+
+    .connect-btn {
+      background: #00bfa5;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .connect-btn:hover {
+      background: #009e8e;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+
+    footer a {
+      color: #00e5ff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="https://cdn-icons-png.flaticon.com/512/10482/10482758.png" alt="VPN Logo" class="logo">
+  <h1>NEVER HIDE VPN</h1>
+  <p class="status" id="status">Status: Disconnected</p>
+
+  <button class="connect-btn" id="connectBtn">Connect</button>
+
+  <footer>
+    Powered by <b>Suleiman Alhassan</b> | Contact: 
+    <a href="mailto:sulleyalhassan.178.as@gmail.com">Email Support</a>
+  </footer>
+
+  <script>
+    const btn = document.getElementById("connectBtn");
+    const status = document.getElementById("status");
+    let connected = false;
+
+    btn.addEventListener("click", () => {
+      if (!connected) {
+        status.textContent = "Status: Connecting...";
+        btn.textContent = "Connecting...";
+        btn.disabled = true;
+        setTimeout(() => {
+          connected = true;
+          status.textContent = "Status: Connected to Public Server 🇯🇵";
+          btn.textContent = "Disconnect";
+          btn.disabled = false;
+          btn.style.background = "#ff5252";
+        }, 3000);
+      } else {
+        connected = false;
+        status.textContent = "Status: Disconnected";
+        btn.textContent = "Connect";
+        btn.style.background = "#00bfa5";
+      }
+    });
+  </script>
+</body>
+  </html>
