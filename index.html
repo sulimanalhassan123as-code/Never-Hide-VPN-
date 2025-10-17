@@ -1,115 +1,261 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEVER HIDE VPN</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, sans-serif;
-    }
-
-    body {
-      background: linear-gradient(180deg, #0d1b2a, #1b263b);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
-
-    .logo {
-      width: 90px;
-      height: 90px;
-      border-radius: 25px;
-      margin-bottom: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-    }
-
-    .status {
-      margin: 10px 0;
-      font-size: 1rem;
-      color: #00ffcc;
-    }
-
-    .connect-btn {
-      background: #00bfa5;
-      border: none;
-      padding: 15px 40px;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    .connect-btn:hover {
-      background: #009e8e;
-      transform: translateY(-2px);
-    }
-
-    footer {
-      position: absolute;
-      bottom: 15px;
-      font-size: 0.8rem;
-      color: #ccc;
-    }
-
-    footer a {
-      color: #00e5ff;
-      text-decoration: none;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Never Hide VPN — Connect</title>
+<meta name="theme-color" content="#20B2AA"/>
+<style>
+  :root{--bg:#081722;--card:#071a1f;--accent:#20B2AA;--muted:#9fb6b2}
+  *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#05202b,#071422);color:#e7f6f5}
+  .wrap{max-width:960px;margin:18px auto;padding:14px}
+  header{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;background:linear-gradient(90deg,#062b2f,#0a2f32);box-shadow:0 8px 30px rgba(2,6,8,0.6)}
+  .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#34d9c8);display:flex;align-items:center;justify-content:center;font-size:28px;color:#002426}
+  header h1{font-size:20px;margin:0}
+  header p{margin:0;color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:8px;align-items:center;margin:12px 0;flex-wrap:wrap}
+  select,input,button{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit}
+  button.btn{background:var(--accent);color:#002426;border:none;cursor:pointer}
+  .main{display:grid;grid-template-columns:1fr 360px;gap:12px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+  #server-list{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .server{padding:10px;border-radius:8px;background:rgba(0,0,0,0.18);display:flex;flex-direction:column;gap:8px}
+  .server .head{display:flex;justify-content:space-between;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  .plan-row{display:flex;gap:6px}
+  .plan-btn{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);cursor:pointer}
+  .plan-btn.active{background:var(--accent);color:#002426;border:none}
+  .actions{display:flex;gap:8px}
+  .actions button{flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer}
+  .download{background:#00796b;color:#fff}
+  .copy{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+  .status-card{display:flex;flex-direction:column;gap:8px}
+  .status-big{font-size:16px;font-weight:700}
+  .usage{font-size:14px;color:var(--muted)}
+  footer{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
+  @media(max-width:900px){.main{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🛡️</div>
+      <div>
+        <h1>Never Hide VPN</h1>
+        <p>Secure Global Node access — select a node and test the connection flow</p>
+      </div>
+    </header>
 
-  <img src="https://cdn-icons-png.flaticon.com/512/10482/10482758.png" alt="VPN Logo" class="logo">
-  <h1>NEVER HIDE VPN</h1>
-  <p class="status" id="status">Status: Disconnected</p>
+    <div class="controls">
+      <select id="countrySelect">
+        <option value="all">All countries</option>
+        <option value="Ghana">Ghana 🇬🇭</option>
+        <option value="United States">United States 🇺🇸</option>
+        <option value="Germany">Germany 🇩🇪</option>
+        <option value="Japan">Japan 🇯🇵</option>
+        <option value="India">India 🇮🇳</option>
+        <option value="United Kingdom">United Kingdom 🇬🇧</option>
+        <option value="Singapore">Singapore 🇸🇬</option>
+      </select>
 
-  <button class="connect-btn" id="connectBtn">Connect</button>
+      <input id="search" placeholder="Search host or IP" style="flex:1" />
+      <button id="refreshBtn" class="btn">Refresh Nodes</button>
+    </div>
 
-  <footer>
-    Powered by <b>Suleiman Alhassan</b> | Contact: 
-    <a href="mailto:sulleyalhassan.178.as@gmail.com">Email Support</a>
-  </footer>
+    <div class="main">
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Available Nodes</h3>
+        <div id="server-list">Loading nodes…</div>
+      </div>
 
-  <script>
-    const btn = document.getElementById("connectBtn");
-    const status = document.getElementById("status");
-    let connected = false;
+      <aside class="card status-card">
+        <div class="status-big" id="statusText">Status: Not connected</div>
+        <div class="muted" id="connectedInfo">No node selected</div>
+        <div class="usage" id="usageText">Used: 0 MB</div>
 
-    btn.addEventListener("click", () => {
-      if (!connected) {
-        status.textContent = "Status: Connecting...";
-        btn.textContent = "Connecting...";
-        btn.disabled = true;
-        setTimeout(() => {
-          connected = true;
-          status.textContent = "Status: Connected to Public Server 🇯🇵";
-          btn.textContent = "Disconnect";
-          btn.disabled = false;
-          btn.style.background = "#ff5252";
-        }, 3000);
-      } else {
-        connected = false;
-        status.textContent = "Status: Disconnected";
-        btn.textContent = "Connect";
-        btn.style.background = "#00bfa5";
-      }
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="connectBtn" class="btn" style="flex:1">Download & Connect</button>
+          <button id="stopBtn" class="" style="flex:1;background:#e74c3c;color:#fff;border:none;display:none">Disconnect</button>
+        </div>
+
+        <div style="margin-top:8px;color:var(--muted);font-size:13px">
+          <div>Contact: <a href="mailto:sulleyalhassan.178.as@gmail.com" style="color:inherit">sulleyalhassan.178.as@gmail.com</a></div>
+          <div style="margin-top:6px">Note: For a real tunnel, import the downloaded .ovpn into a native OpenVPN client (OpenVPN Connect).</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>© 2025 Suleiman Alhassan — Powered by Suleiman Alhassan</footer>
+  </div>
+
+<script>
+/* Simple node loader + download & simulated connect flow */
+const API = 'https://www.vpngate.net/api/iphone/'; // public list
+const serverListEl = document.getElementById('server-list');
+const refreshBtn = document.getElementById('refreshBtn');
+const countrySelect = document.getElementById('countrySelect');
+const searchEl = document.getElementById('search');
+const connectBtn = document.getElementById('connectBtn');
+const stopBtn = document.getElementById('stopBtn');
+const statusText = document.getElementById('statusText');
+const connectedInfo = document.getElementById('connectedInfo');
+const usageText = document.getElementById('usageText');
+
+let servers = [];
+let selectedServer = null;
+let simState = {connected:false, planMB:0, usedMB:0, timer:null};
+
+// fetch nodes
+async function fetchNodes(){
+  serverListEl.innerHTML = 'Loading nodes…';
+  try {
+    const res = await fetch(API, {cache:'no-cache'});
+    const txt = await res.text();
+    const lines = txt.split('\\n').filter(l => l.trim() && !l.startsWith('#'));
+    servers = lines.map(parseLine).filter(s => s && s.ovpnBase64);
+    // prefer Ghana at top
+    servers.sort((a,b)=>(a.country==='Ghana'? -1:0) - (b.country==='Ghana'? -1:0));
+    renderList();
+  } catch(err) {
+    console.error(err);
+    serverListEl.innerHTML = '<div style="padding:10px">Failed to load nodes. Check your connection.</div>';
+  }
+}
+
+function parseLine(line){
+  const parts = line.split('\\t');
+  if(parts.length < 6) return null;
+  const host = parts[0], ip = parts[1], score = Number(parts[2])||0, ping = Number(parts[3])||0, speed = Number(parts[4])||0, country = parts[5]||'Unknown';
+  let ovpnBase64 = null;
+  for(let i=parts.length-1;i>=0;i--){
+    const p = parts[i];
+    if(p && /[A-Za-z0-9+/]{20,}={0,2}/.test(p)){ ovpnBase64 = p; break; }
+  }
+  return {host, ip, score, ping, speed, country, ovpnBase64};
+}
+
+function renderList(){
+  const q = (searchEl.value||'').toLowerCase().trim();
+  const country = countrySelect.value;
+  let list = servers.slice();
+  if(country !== 'all') list = list.filter(s => s.country === country);
+  if(q) list = list.filter(s => (s.country + ' ' + s.ip + ' ' + s.host).toLowerCase().includes(q));
+  if(!list.length){ serverListEl.innerHTML = '<div style="padding:10px">No nodes found</div>'; return; }
+
+  serverListEl.innerHTML = '';
+  list.slice(0,80).forEach((s, idx) => {
+    const el = document.createElement('div');
+    el.className = 'server';
+    el.innerHTML = `
+      <div class="head">
+        <div>
+          <div style="font-weight:700">${s.country}</div>
+          <div class="muted">${s.host} • ${s.ip}</div>
+        </div>
+        <div class="muted">${Math.round(s.speed/1000000)} Mbps</div>
+      </div>
+      <div class="muted">Ping: ${s.ping} ms • Score: ${s.score}</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="download download-btn">Download .ovpn</button>
+        <button class="copy copy-btn">Copy IP</button>
+        <select class="plan" style="padding:8px;border-radius:8px">
+          <option value="200">Free 200 MB</option>
+          <option value="500">500 MB</option>
+          <option value="1000">1 GB</option>
+        </select>
+      </div>
+    `;
+    serverListEl.appendChild(el);
+
+    // listeners
+    el.querySelector('.download-btn').addEventListener('click', ()=>{
+      const plan = el.querySelector('.plan').value;
+      selectedServer = s;
+      downloadOvpn(s, plan);
     });
-  </script>
+    el.querySelector('.copy-btn').addEventListener('click', ()=>{
+      navigator.clipboard?.writeText(s.ip).then(()=>alert('IP copied'));
+    });
+  });
+}
+
+function base64ToBlob(base64){
+  const cleaned = base64.replace(/\\s/g,'');
+  const binary = atob(cleaned);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for(let i=0;i<len;i++) bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes], {type:'application/x-openvpn-profile'});
+}
+
+function downloadOvpn(s, plan){
+  if(!s.ovpnBase64){ alert('No profile available for this node.'); return; }
+  try {
+    const blob = base64ToBlob(s.ovpnBase64);
+    const filename = `node-${s.country.replace(/\\s+/g,'_')}-${s.ip}.ovpn`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    // start simulated connect flow
+    startSimulatedConnect(s, Number(plan));
+    alert('Profile downloaded. Open it with OpenVPN Connect to make the real tunnel.');
+  } catch(e){
+    console.error(e); alert('Download failed.');
+  }
+}
+
+function startSimulatedConnect(s, planMB){
+  stopSimulatedConnect();
+  simState.connected = true;
+  simState.planMB = planMB;
+  simState.usedMB = 0;
+  statusText.textContent = 'Status: Connecting to Secure Global Node…';
+  connectedInfo.textContent = `${s.country} (${s.ip}) — preparing secure node`;
+  connectBtn.style.display = 'none';
+  stopBtn.style.display = 'inline-block';
+  stopBtn.disabled = false;
+
+  setTimeout(()=> {
+    statusText.textContent = 'Status: Connected — Secure Global Node';
+    connectedInfo.textContent = `Connected to ${s.country} (${s.ip}) — Plan ${planMB} MB`;
+    usageText.textContent = `Used: 0 MB / ${planMB} MB`;
+    // simulate usage
+    simState.timer = setInterval(()=>{
+      const inc = Math.floor(Math.random()*6) + 2; // 2..7 MB
+      simState.usedMB += inc;
+      usageText.textContent = `Used: ${simState.usedMB} MB / ${simState.planMB} MB`;
+      if(simState.usedMB >= simState.planMB){
+        alert('Data plan finished.');
+        stopSimulatedConnect();
+      }
+    }, 2000);
+  }, 1400);
+}
+
+function stopSimulatedConnect(){
+  if(simState.timer) clearInterval(simState.timer);
+  simState = {connected:false, planMB:0, usedMB:0, timer:null};
+  statusText.textContent = 'Status: Not connected';
+  connectedInfo.textContent = 'No node selected';
+  usageText.textContent = 'Used: 0 MB';
+  connectBtn.style.display = 'inline-block';
+  stopBtn.style.display = 'none';
+}
+
+refreshBtn.addEventListener('click', fetchNodes);
+countrySelect.addEventListener('change', renderList);
+searchEl.addEventListener('input', renderList);
+stopBtn.addEventListener('click', stopSimulatedConnect);
+connectBtn.addEventListener('click', ()=>{
+  if(selectedServer){
+    downloadOvpn(selectedServer, 200);
+  } else {
+    alert('Please pick a node from the list to download and connect.');
+  }
+});
+
+// initial load
+fetchNodes();
+</script>
 </body>
   </html>
