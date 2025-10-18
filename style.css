@@ -1,70 +1,181 @@
-:root{
-  --bg:#071826;         /* deep dark */
-  --panel:#0b2a3a;      /* dark panel */
-  --accent:#1294d6;     /* bright blue highlight */
-  --muted:#9fb9c9;
-  --card:#071f2a;
-  --glass: rgba(255,255,255,0.03);
+/* ======= Global ======= */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #0f172a; /* deep navy */
+  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* reset */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body,#app{height:100%}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg),#031219);color:#dff6ff;}
+h1, h2, h3 {
+  margin: 0;
+}
 
-/* header */
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:linear-gradient(90deg,var(--panel),#022b36);box-shadow:0 6px 18px rgba(0,0,0,0.6)}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:56px;height:56px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022}
-.brand-text h1{font-size:1.05rem;margin-bottom:2px}
-.brand-text .sub{font-size:0.8rem;color:var(--muted)}
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: #1e40af;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  transition: background 0.3s;
+}
 
-/* nav */
-.nav .nav-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
-.nav .nav-btn:hover{border-color:var(--accent);color:#fff}
+button:hover {
+  background: #2563eb;
+}
 
-/* layout */
-.main{display:grid;grid-template-columns:1fr 320px;gap:16px;padding:18px;max-width:1100px;margin:12px auto;width:calc(100% - 40px)}
-.left{display:flex;flex-direction:column;gap:14px}
-.right{display:flex;flex-direction:column;gap:12px}
+a {
+  color: #38bdf8;
+  text-decoration: none;
+}
 
-/* cards */
-.card{background:linear-gradient(180deg,var(--card),#041c25);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 24px rgba(0,0,0,0.6)}
-.hidden{display:none}
+/* ======= Header ======= */
+.header {
+  background: #1e293b;
+  text-align: center;
+  padding: 16px 8px;
+  border-bottom: 2px solid #2563eb;
+}
 
-/* assistant chat window */
-.assistant{min-height:420px;display:flex;flex-direction:column}
-.chat-window{flex:1;padding:8px;overflow:auto;display:flex;flex-direction:column;gap:10px;border-radius:8px;background:linear-gradient(180deg,#021b22,#041f29);margin-bottom:10px}
-.msg{max-width:82%;padding:10px;border-radius:12px;line-height:1.3}
-.msg.ai{background:linear-gradient(180deg,rgba(18,148,214,0.15),rgba(18,148,214,0.06));border-left:4px solid var(--accent);align-self:flex-start;color:#eaffff}
-.msg.user{background:rgba(255,255,255,0.04);align-self:flex-end;color:#dff6ff;text-align:right}
+.header h1 {
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
 
-/* controls area */
-.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.controls .btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer}
-.controls .btn.primary{background:linear-gradient(90deg,var(--accent),#26b0ff);color:#012}
+.header .tagline {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
 
-/* grid for courses */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:10px}
-.book{padding:12px;border-radius:10px;background:linear-gradient(180deg,#021b22,#041f29);border:1px solid rgba(255,255,255,0.03)}
-.book h3{color:#dff6ff;margin-bottom:6px}
-.book p{color:var(--muted);font-size:0.9rem}
-.openBtn{margin-top:8px;padding:8px 10px;border-radius:8px;border:none;background:var(--accent);color:#012;cursor:pointer}
+/* ======= Navigation ======= */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: #0f172a;
+  border-bottom: 1px solid #1e3a8a;
+}
 
-/* forum */
-#forumForm input,#forumForm textarea{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#dff6ff;margin-bottom:8px}
-.btn{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#012;cursor:pointer}
+.nav-btn {
+  margin: 6px;
+  background: #1e293b;
+  padding: 10px 18px;
+  border-radius: 6px;
+}
 
-/* small settings card */
-.settings input, .settings select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#dff6ff;margin-top:8px}
-.warning{margin-top:10px;font-size:13px;color:#ffd7d7;background:rgba(255,150,150,0.03);padding:8px;border-radius:8px}
+.nav-btn.active {
+  background: #2563eb;
+}
 
-/* footer */
-.footer{text-align:center;padding:12px;margin-top:14px;color:var(--muted)}
+/* ======= Main Sections ======= */
+.main {
+  flex: 1;
+  padding: 16px;
+  max-width: 900px;
+  margin: auto;
+}
 
-/* responsive */
-@media (max-width:980px){
-  .main{grid-template-columns:1fr; padding:12px}
-  .right{order:2}
-  .left{order:1}
-      }
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* ======= AI Chat Box ======= */
+.chat-box {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 200px;
+  box-shadow: 0 0 10px rgba(59,130,246,0.2);
+}
+
+.message {
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.message.ai {
+  color: #a5b4fc;
+}
+
+.options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ======= Courses ======= */
+.courses {
+  display: grid;
+  gap: 16px;
+}
+
+.course {
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #2563eb;
+}
+
+.course h3 {
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.course p {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+/* ======= Community ======= */
+#community input,
+#community textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #1e3a8a;
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+#community button {
+  margin-bottom: 10px;
+}
+
+/* ======= Settings ======= */
+#settings input, #settings select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #1e3a8a;
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 10px;
+}
+
+/* ======= Footer ======= */
+footer {
+  background: #1e293b;
+  color: #94a3b8;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.8rem;
+  border-top: 1px solid #2563eb;
+  }
