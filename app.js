@@ -1,295 +1,317 @@
-/* Suleiman Cyber System - stepwise AI assistant + courses (no video)
-   - assistant shows short messages and waits for user confirmation before continuing
-   - lessons are text only
-   - homework saved locally and receives simulated feedback
-*/
+// app.js — Suleiman Cyber System (main-screen chat, Gemini optional)
+// NOTE: This file uses a client-side Gemini key only if you select "Gemini" mode.
+// For production, using a server-side proxy is strongly recommended.
 
 const courses = [
-  {
-    id: 'intro-cyber',
-    title: 'Introduction to Cybersecurity',
-    desc: 'Foundations: CIA triad, basic terminology, careers.',
-    lessons: [
-      { id: 'l1', title: 'What is Cybersecurity?', content: 'Cybersecurity protects systems, networks, and data. The CIA triad: Confidentiality, Integrity, Availability.'},
-      { id: 'l2', title: 'Basic Terminology', content: 'Threat, vulnerability, exploit, risk, mitigation, patching.'},
-      { id: 'l3', title: 'Careers & Ethics', content: 'Blue team, red team, SOC, compliance.'}
+  { id:'intro-cyber', title:'Introduction to Cybersecurity', desc:'Foundations: CIA triad, basics, ethics.',
+    lessons:[
+      {id:'l1',title:'What is Cybersecurity?', content:'Cybersecurity protects systems, networks, and data. The CIA triad: Confidentiality, Integrity, Availability.'},
+      {id:'l2',title:'Basic Terminology', content:'Threat, vulnerability, exploit, risk, mitigation, patching.'},
+      {id:'l3',title:'Careers & Ethics', content:'Blue team, red team, SOC, compliance.'}
     ]
   },
-  {
-    id: 'ethical-hacking',
-    title: 'Fundamentals of Ethical Hacking',
-    desc: 'Reconnaissance, scanning, exploitation basics, responsible disclosure.',
-    lessons: [
-      { id: 'h1', title: 'Reconnaissance', content: 'Passive vs active recon, tools (whois, nslookup).'},
-      { id: 'h2', title: 'Scanning', content: 'Port scanning basics (nmap), service discovery.'},
-      { id: 'h3', title: 'Exploitation Basics', content: 'Common web vulnerabilities overview (XSS, SQLi).'}
+  { id:'ethical-hacking', title:'Fundamentals of Ethical Hacking', desc:'Recon & scanning basics, responsible disclosure.',
+    lessons:[
+      {id:'h1',title:'Reconnaissance',content:'Passive vs active recon; examples: whois, DNS lookup.'},
+      {id:'h2',title:'Scanning',content:'Port scanning basics (nmap).'},
+      {id:'h3',title:'Exploitation Basics',content:'Overview of common vulnerabilities.'}
     ]
   },
-  {
-    id: 'defense',
-    title: 'Defensive Strategies',
-    desc: 'Hardening, patching, monitoring, incident response.',
-    lessons: [
-      { id: 'd1', title: 'Hardening Systems', content: 'Least privilege, secure configuration.'},
-      { id: 'd2', title: 'Monitoring & Detection', content: 'SIEM basics, logs, alerts.'},
-      { id: 'd3', title: 'Incident Response', content: 'Steps: Identification, containment, eradication, recovery.'}
+  { id:'defense', title:'Defensive Strategies', desc:'Hardening, monitoring, incident response.',
+    lessons:[
+      {id:'d1',title:'Hardening Systems',content:'Least privilege, secure configs.'},
+      {id:'d2',title:'Monitoring & Detection',content:'Logs, SIEM basics.'},
+      {id:'d3',title:'Incident Response',content:'Identification → containment → recovery.'}
     ]
   }
 ];
 
-/* helpers */
+/* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
-const show = id => {
-  document.querySelectorAll('main section, main > div.card, main aside.assistant').forEach(n=>n.classList.add('hidden'));
-  const el = document.getElementById(id);
-  if(el) el.classList.remove('hidden');
-};
-const saveJSON = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-const readJSON = (k,def=null)=>{ try { return JSON.parse(localStorage.getItem(k)) ?? def } catch { return def } };
+const create = (tag, cls='') => { const e = document.createElement(tag); if(cls) e.className = cls; return e; };
 
-/* DOM */
-const assistantMsgs = document.getElementById('assistantMessages');
-const assistantControls = document.getElementById('assistantControls');
+function saveJSON(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function readJSON(k,def=null){ try { return JSON.parse(localStorage.getItem(k)) ?? def } catch { return def } }
 
-const welcomeCard = $('#welcomeCard');
-const coursesGrid = $('#coursesGrid');
-const catalog = $('#catalog');
-const courseView = $('#courseView');
-const courseContent = $('#courseContent');
-const myWork = $('#myWork');
-const forum = $('#forum');
+/* ---------- DOM ---------- */
+const chatWindow = $('#chatWindow');
+const controls = $('#controls');
+const aiModeSelect = $('#aiMode');
+const geminiKeyInput = $('#geminiKey');
+const saveKeyBtn = $('#saveKey');
 
 const btnCatalog = $('#btnCatalog');
 const btnMyWork = $('#btnMyWork');
 const btnForum = $('#btnForum');
 const btnSettings = $('#btnSettings');
+const coursesGrid = $('#coursesGrid');
+const catalog = $('#catalog');
+const courseView = $('#courseView');
+const courseContent = $('#courseContent');
+const backToCatalog = $('#backToCatalog');
+const myWork = $('#myWork');
+const forum = $('#forum');
+const forumList = $('#forumList');
+const postMsgBtn = $('#postMsg');
 
-btnCatalog.onclick = ()=> { renderCatalog(); show('catalog'); showAssistantPanel(); };
-btnMyWork.onclick = ()=> { renderSubmissions(); show('myWork'); hideAssistantPanel(); };
-btnForum.onclick = ()=> { renderForum(); show('forum'); hideAssistantPanel(); };
-btnSettings.onclick = ()=> { show('settings'); hideAssistantPanel(); };
+/* ---------- UI management ---------- */
+function clearChat(){ chatWindow.innerHTML=''; }
+function pushMsg(text, who='ai'){ const m = create('div','msg '+(who==='ai'?'ai':'user')); m.textContent = text; chatWindow.appendChild(m); chatWindow.scrollTop = chatWindow.scrollHeight; }
+function setControls(nodes){ controls.innerHTML=''; nodes.forEach(n=>controls.appendChild(n)); }
 
-/* assistant helpers */
-function clearAssistant(){
-  assistantMsgs.innerHTML = '';
-  assistantControls.innerHTML = '';
-}
-function pushAI(text){
-  const d = document.createElement('div'); d.className='assistant-msg ai'; d.textContent = text;
-  assistantMsgs.appendChild(d); assistantMsgs.scrollTop = assistantMsgs.scrollHeight;
-}
-function pushUser(text){
-  const d = document.createElement('div'); d.className='assistant-msg user'; d.textContent = text;
-  assistantMsgs.appendChild(d); assistantMsgs.scrollTop = assistantMsgs.scrollHeight;
-}
-function setAssistantButtons(buttons=[]){
-  assistantControls.innerHTML = '';
-  buttons.forEach(b=>{
-    const btn = document.createElement('button');
-    btn.className = b.primary ? 'btn-primary' : 'btn-ghost';
-    btn.textContent = b.label;
-    btn.onclick = b.onClick;
-    assistantControls.appendChild(btn);
-  });
+/* ---------- assistant flow (stepwise) ---------- */
+function startAssistant(){
+  clearChat();
+  pushMsg('Hello — I am your AI assistant. I will guide you step-by-step and wait for your confirmation before continuing.');
+  setTimeout(()=> askIntroQuestion(), 700);
 }
 
-/* initial assistant state */
-function showAssistantPanel(){ document.querySelector('aside.assistant').classList.remove('hidden'); }
-function hideAssistantPanel(){ document.querySelector('aside.assistant').classList.add('hidden'); }
-
-/* Stepwise welcome flow */
-function startWelcomeFlow(){
-  clearAssistant();
-  pushAI('Hello — I am your AI assistant. I will guide you step-by-step. First: do you understand that this course will teach cybersecurity basics and responsible ethical behavior?');
-  setAssistantButtons([
-    { label: 'I understand', primary:true, onClick: ()=> { pushUser('I understand'); step2(); } },
-    { label: 'Explain again', onClick: ()=> { pushUser('Explain again'); pushAI('This platform teaches defensive and ethical skills: how to find vulnerabilities responsibly and how to protect systems. It will never teach harming others. Do you understand now?'); setAssistantButtons([{label:'I understand', primary:true, onClick: ()=> { pushUser('I understand'); step2(); }}]); } }
-  ]);
+function askIntroQuestion(){
+  pushMsg('First: Do you have prior cybersecurity knowledge, or are you a beginner?');
+  const btnBegin = create('button','btn'); btnBegin.textContent='I am a Beginner';
+  const btnSome = create('button','btn'); btnSome.textContent='Some Knowledge';
+  const btnAdv = create('button','btn'); btnAdv.textContent='Advanced';
+  btnBegin.onclick = ()=> selectLevel('beginner');
+  btnSome.onclick = ()=> selectLevel('intermediate');
+  btnAdv.onclick = ()=> selectLevel('advanced');
+  setControls([btnBegin, btnSome, btnAdv]);
 }
 
-function step2(){
-  pushAI('Good. Next: I will show you a short course recommendation based on your level. Would you like to continue to recommendations?');
-  setAssistantButtons([
-    { label: 'Yes, continue', primary:true, onClick: ()=> { pushUser('Yes, continue'); showRecommendations(); } },
-    { label: 'Not now', onClick: ()=> { pushUser('Not now'); pushAI('No problem — you can open the Catalog anytime.'); setAssistantButtons([{label:'Open Catalog', primary:true, onClick: ()=>{ pushUser('Open Catalog'); renderCatalog(); show('catalog'); }}]); } }
-  ]);
+function selectLevel(level){
+  pushMsg(`Selected: ${level}`, 'user');
+  localStorage.setItem('suleiman_user_level', level);
+  setControls([]);
+  setTimeout(()=> {
+    pushMsg(`Nice. I will recommend a short learning path for you. Ready for recommendations?`);
+    const yes = create('button','btn primary'); yes.textContent='Yes, show me';
+    const later = create('button','btn'); later.textContent='Maybe later';
+    yes.onclick = ()=> { pushMsg('Yes, show me','user'); showRecommendations(level); };
+    later.onclick = ()=> { pushMsg('Maybe later','user'); pushMsg('Alright — open the Catalog anytime from the top menu.'); setControls([]); };
+    setControls([yes,later]);
+  },600);
 }
 
-function showRecommendations(){
-  // simple tailored message
-  const level = localStorage.getItem('suleiman_user_level') || 'beginner';
-  pushAI(`Based on your level: ${level}. I recommend starting with:`);
-  if(level === 'beginner') pushAI('1) Introduction to Cybersecurity\n2) Fundamentals of Ethical Hacking\n3) Defensive Strategies');
-  else if(level === 'intermediate') pushAI('1) Fundamentals of Ethical Hacking\n2) Defensive Strategies\n3) Labs & Practice');
-  else pushAI('1) Offensive techniques (responsibly)\n2) Defense & Incident Response\n3) Advanced labs');
-  setAssistantButtons([{ label: 'Open Catalog', primary:true, onClick: ()=>{ pushUser('Open Catalog'); renderCatalog(); show('catalog'); } }]);
+function showRecommendations(level){
+  setControls([]);
+  if(level === 'beginner'){
+    pushMsg('Recommended path: 1) Introduction to Cybersecurity → 2) Ethical Hacking basics → 3) Defensive Strategies');
+  } else if(level === 'intermediate'){
+    pushMsg('Recommended path: 1) Ethical Hacking basics → 2) Defensive Strategies → 3) Labs');
+  } else {
+    pushMsg('Recommended path: 1) Advanced offensive techniques (ethical) → 2) Defensive response → 3) Labs');
+  }
+  const open = create('button','btn primary'); open.textContent='Open Catalog';
+  open.onclick = ()=> { pushMsg('Open Catalog','user'); renderCatalog(); showSection('catalog'); setControls([]); };
+  setControls([open]);
 }
 
-/* Welcome button handlers (choose level) */
-document.querySelectorAll('.pill').forEach(btn=>{
-  btn.addEventListener('click', (e)=>{
-    const level = e.target.dataset.level;
-    localStorage.setItem('suleiman_user_level', level);
-    pushUser(`Level selected: ${level}`);
-    startWelcomeFlow();
-  });
-});
-
-/* render catalog */
+/* ---------- Catalog ---------- */
 function renderCatalog(){
   coursesGrid.innerHTML = '';
-  const userLevel = localStorage.getItem('suleiman_user_level') || 'beginner';
-  const ordered = [...courses];
-  if(userLevel === 'beginner') ordered.sort((a,b)=> a.id === 'intro-cyber' ? -1 : 0);
-  ordered.forEach(c=>{
-    const card = document.createElement('div'); card.className='book card book';
-    card.innerHTML = `<h3>${c.title}</h3><p>${c.desc}</p><button class="openBtn">Open Course</button>`;
-    card.querySelector('.openBtn').addEventListener('click', ()=> openCourse(c.id));
-    coursesGrid.appendChild(card);
+  const level = localStorage.getItem('suleiman_user_level') || 'beginner';
+  const list = [...courses];
+  if(level === 'beginner') list.sort((a,b)=> a.id==='intro-cyber' ? -1 : 0);
+  list.forEach(c=>{
+    const el = create('div','book'); el.innerHTML = `<h3>${c.title}</h3><p>${c.desc}</p>`;
+    const open = create('button','openBtn'); open.textContent='Open';
+    open.onclick = ()=> openCourse(c.id);
+    el.appendChild(open);
+    coursesGrid.appendChild(el);
   });
 }
 
-/* open course (no video) */
-function openCourse(courseId){
-  const c = courses.find(x=>x.id===courseId);
+/* ---------- open a course (text only) ---------- */
+function openCourse(id){
+  const c = courses.find(x=>x.id===id);
   if(!c) return;
-  courseContent.innerHTML = `<h2>${c.title}</h2><p class="muted">${c.desc}</p>`;
+  courseContent.innerHTML = `<h2>${c.title}</h2><p style="color:#9fb9c9">${c.desc}</p>`;
   c.lessons.forEach(lesson=>{
-    const d = document.createElement('div'); d.className='lesson card';
-    d.innerHTML = `<h4>${lesson.title}</h4>
-                   <p>${lesson.content}</p>
-                   <div class="homework"><label>Homework: Summarize this lesson in 2-4 sentences</label>
-                   <textarea id="hw-${lesson.id}" placeholder="Write your summary here..."></textarea>
-                   <button data-course="${courseId}" data-lesson="${lesson.id}" class="submitHomework">Submit Homework</button>
-                   <div class="feedback" id="fb-${lesson.id}"></div>
-                   </div>`;
+    const d = create('div','lesson card');
+    d.innerHTML = `<h4>${lesson.title}</h4><p>${lesson.content}</p>
+      <div class="homework">
+        <label>Homework: Summarize this lesson in 2–4 sentences</label>
+        <textarea id="hw-${lesson.id}" placeholder="Write summary here..." style="width:100%;min-height:90px;margin-top:8px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#dff6ff"></textarea>
+        <button data-course="${id}" data-lesson="${lesson.id}" class="btn" style="margin-top:8px">Submit</button>
+        <div id="fb-${lesson.id}" style="margin-top:8px;color:#9fb9c9"></div>
+      </div>`;
     courseContent.appendChild(d);
   });
+  // certificate
+  const cert = create('button','btn'); cert.textContent='Generate Certificate'; cert.style.marginTop='8px';
+  cert.onclick = ()=> generateCertificate(c.title);
+  courseContent.appendChild(cert);
 
-  const certBtn = document.createElement('button'); certBtn.className='link'; certBtn.textContent='Download Certificate for this Course';
-  certBtn.addEventListener('click', ()=> generateCertificate(c.title));
-  courseContent.appendChild(certBtn);
+  backToCatalog.onclick = ()=> { renderCatalog(); showSection('catalog') };
+  showSection('courseView');
 
-  $('#backToCatalog').onclick = ()=> { renderCatalog(); show('catalog'); };
-  show('courseView');
-  showAssistantPanel();
-  pushAI(`You opened the course: ${c.title}. Read each lesson, then submit the short homework when ready. I will check it and give feedback. Would you like me to remind you to take breaks?`);
-  setAssistantButtons([
-    { label: 'Yes, remind me', primary:true, onClick: ()=> { pushUser('Yes, remind me'); pushAI('I will remind after each lesson to rest 5 minutes. Good luck!'); setAssistantButtons([{label:'OK', onClick: ()=>{ pushUser('OK'); }}]); } },
-    { label: 'No, thanks', onClick: ()=> { pushUser('No, thanks'); pushAI('Alright — continue at your pace.'); setAssistantButtons([{label:'Let\'s continue', primary:true, onClick: ()=>{ pushUser('Let\'s continue'); }}]); } }
-  ]);
-
-  // attach homework submit listeners
+  // attach submit listeners
   setTimeout(()=>{
-    document.querySelectorAll('.submitHomework').forEach(btn=>{
-      btn.addEventListener('click', async (e)=>{
+    document.querySelectorAll('.homework button').forEach(b=>{
+      b.addEventListener('click', async (e)=>{
         const courseId = e.target.dataset.course;
         const lessonId = e.target.dataset.lesson;
-        const textarea = document.getElementById(`hw-${lessonId}`);
-        const answer = textarea.value.trim();
+        const ta = document.getElementById(`hw-${lessonId}`);
+        const answer = (ta.value || '').trim();
         if(!answer){ alert('Please write your homework before submitting.'); return; }
-        const submissions = readJSON('suleiman_submissions', []) || [];
-        const record = { id: Date.now(), courseId, lessonId, answer, timestamp: new Date().toISOString() };
-        submissions.unshift(record);
-        saveJSON('suleiman_submissions', submissions);
-        const fb = await getFeedback(answer);
-        document.getElementById(`fb-${lessonId}`).innerHTML = `<div class="muted">Feedback: ${fb}</div>`;
+        // save submission locally
+        const subs = readJSON('suleiman_submissions', []) || [];
+        const record = { id:Date.now(), courseId, lessonId, answer, ts:new Date().toISOString() };
+        subs.unshift(record); saveJSON('suleiman_submissions', subs);
+        // get feedback (Gemini or simulated)
+        const fb = await getAIResponse(`Give brief feedback for this student answer: "${answer}"`);
+        document.getElementById(`fb-${lesson.id}`).textContent = `Feedback: ${fb}`;
         renderSubmissions();
-        // assistant asks if user understood feedback
-        pushAI('I gave feedback. Do you understand the suggestions?');
-        setAssistantButtons([
-          { label: 'Yes, understood', primary:true, onClick: ()=>{ pushUser('Yes, understood'); pushAI('Great — move to the next lesson when ready.'); setAssistantButtons([]); } },
-          { label: 'Explain more', onClick: ()=>{ pushUser('Explain more'); pushAI('Example: add an example scenario with steps and tools. If you want, ask me for sample commands.'); } }
-        ]);
+        // ask user if they understood
+        pushMsg('I have given feedback. Do you understand the suggestions?');
+        const yes = create('button','btn primary'); yes.textContent='Yes, understood';
+        const explain = create('button','btn'); explain.textContent='Explain more';
+        yes.onclick = ()=> { pushMsg('Yes, understood','user'); pushMsg('Great — move to the next lesson when ready.'); setControls([]); };
+        explain.onclick = ()=> { pushMsg('Explain more','user'); pushMsg('Example: add a short real-world example showing how the concept applies.'); };
+        setControls([yes, explain]);
       });
     });
   }, 120);
 }
 
-/* simulated AI feedback */
-async function getFeedback(text){
-  const mode = (document.getElementById('aiMode')?.value) || 'sim';
-  if(mode === 'api'){
-    const key = localStorage.getItem('suleiman_ai_key') || '';
-    if(!key) return 'AI key not set. Switch to Simulated mode or add key in Settings.';
-    return 'External AI mode selected but no live call configured in this demo.';
-  } else {
-    const words = text.split(/\s+/).length;
-    if(words < 8) return 'Short answer — try to write at least 2-3 sentences with examples.';
-    if(text.toLowerCase().includes('attack') || text.toLowerCase().includes('exploit')) {
-      return 'Good awareness of attacker methods — emphasize ethics and defense.';
-    }
-    return 'Nice summary! You covered the main ideas — consider adding an example scenario.';
-  }
-}
-
-/* submissions & forum */
+/* ---------- Submissions & forum ---------- */
 function renderSubmissions(){
   const list = readJSON('suleiman_submissions', []) || [];
   const el = $('#submissionsList'); if(!el) return;
   el.innerHTML = '';
-  if(!list.length) { el.innerHTML = '<div class="card muted">No submissions yet.</div>'; return; }
+  if(!list.length){ el.innerHTML = '<div class="card" style="color:#9fb9c9">No submissions yet.</div>'; return; }
   list.forEach(s=>{
-    const d = document.createElement('div'); d.className='card';
-    const course = courses.find(c=>c.id === s.courseId)?.title || s.courseId;
-    d.innerHTML = `<strong>${course} — ${s.lessonId}</strong><div class="muted">${new Date(s.timestamp).toLocaleString()}</div><p>${s.answer}</p>`;
+    const d = create('div','card'); d.innerHTML = `<strong>${s.courseId} — ${s.lessonId}</strong><div style="color:#9fb9c9">${new Date(s.ts).toLocaleString()}</div><p>${s.answer}</p>`;
     el.appendChild(d);
   });
-  const certEl = $('#certList'); certEl.innerHTML = '<h3>Your Certificates</h3><div class="muted">Certificates for completed courses will appear here.</div>';
+  const certEl = $('#certList'); if(certEl) certEl.innerHTML = '<div style="color:#9fb9c9">Certificates will appear here.</div>';
 }
 
-/* forum */
-$('#postMsg').addEventListener('click', ()=>{
+postMsgBtn.addEventListener('click', ()=>{
   const name = $('#forumName').value.trim() || 'Anonymous';
   const msg = $('#forumMsg').value.trim();
   if(!msg) return alert('Type a message first');
-  const posts = readJSON('suleiman_forum', []) || [];
-  posts.unshift({id:Date.now(), name, msg, ts: new Date().toISOString()});
+  const posts = readJSON('suleiman_forum',[])||[];
+  posts.unshift({id:Date.now(),name,msg,ts:new Date().toISOString()});
   saveJSON('suleiman_forum', posts);
-  $('#forumMsg').value = '';
+  $('#forumMsg').value='';
   renderForum();
 });
 function renderForum(){
-  const posts = readJSON('suleiman_forum', []) || [];
-  const list = $('#forumList'); list.innerHTML = '';
-  if(!posts.length) { list.innerHTML = '<div class="card muted">No posts yet — be the first!</div>'; return; }
+  const posts = readJSON('suleiman_forum',[])||[];
+  forumList.innerHTML='';
+  if(!posts.length){ forumList.innerHTML = '<div class="card" style="color:#9fb9c9">No posts yet.</div>'; return; }
   posts.forEach(p=>{
-    const e = document.createElement('div'); e.className='forum-entry';
-    e.innerHTML = `<strong>${p.name}</strong> <span class="muted">${new Date(p.ts).toLocaleString()}</span><p>${p.msg}</p>`;
-    list.appendChild(e);
+    const e = create('div','forum-entry card'); e.innerHTML = `<strong>${p.name}</strong><div style="color:#9fb9c9">${new Date(p.ts).toLocaleString()}</div><p>${p.msg}</p>`;
+    forumList.appendChild(e);
   });
 }
 
-/* certificate generation (printable) */
+/* ---------- Certificate ---------- */
 function generateCertificate(courseTitle){
   const name = prompt('Enter your name for the certificate:') || 'Student';
-  const w = window.open('', '_blank');
+  const w = window.open('','_blank');
   const html = `
     <html><head><title>Certificate</title>
-    <style>body{font-family:Arial;padding:40px;color:#042;} .card{border:8px solid #0e7b6b;padding:30px;border-radius:12px;text-align:center} h1{margin-bottom:0}</style>
-    </head><body><div class="card"><h1>Certificate of Completion</h1><p>This certifies that</p><h2>${name}</h2><p>has completed</p><h3>${courseTitle}</h3><p>Date: ${new Date().toLocaleDateString()}</p><p>Powered by Suleiman Cyber System</p></div></body></html>`;
+    <style>body{font-family:Arial;padding:40px;color:#042;background:#fff} .card{border:8px solid ${getComputedStyle(document.documentElement).getPropertyValue('--accent')||'#1294d6'};padding:30px;border-radius:12px;text-align:center}</style></head>
+    <body><div class="card"><h1>Certificate of Completion</h1><p>This certifies that</p><h2>${name}</h2><p>has completed</p><h3>${courseTitle}</h3><p>Date: ${new Date().toLocaleDateString()}</p><p>Powered by SULEIMAN CYBER SYSTEM</p></div></body></html>`;
   w.document.write(html); w.document.close();
 }
 
-/* settings */
-$('#aiMode').addEventListener('change', (e)=>{
-  const showRow = e.target.value === 'api';
-  document.getElementById('apiKeyRow').classList.toggle('hidden', !showRow);
-});
-$('#saveKey').addEventListener('click', ()=>{
-  const key = $('#aiKey').value.trim();
-  if(!key) return alert('Enter a key or cancel');
-  localStorage.setItem('suleiman_ai_key', key);
-  alert('Key saved locally. Keep it private.');
+/* ---------- AI / Gemini integration ---------- */
+
+/*
+  IMPORTANT SECURITY NOTE (read before enabling Gemini mode):
+  - Putting your Gemini API key inside client-side JavaScript exposes it to anyone who inspects the page.
+  - For production, you should create a small server-side proxy that stores your API key and forwards requests securely.
+  - This demo supports a client-side Gemini call (best-effort), but CORS or endpoint changes might require a server proxy.
+*/
+
+/* helper: call Gemini or fallback to simulated response */
+async function getAIResponse(prompt){
+  const mode = (aiModeSelect.value || 'sim');
+  // quick simulated responses (safe)
+  if(mode === 'sim') {
+    // simple rule-based reply (keeps things short - stepwise)
+    const words = prompt.split(/\s+/).length;
+    if(words < 6) return 'Short reply — try to add 2-3 sentences.';
+    if(prompt.toLowerCase().includes('attack') || prompt.toLowerCase().includes('exploit')) {
+      return 'Good awareness of attacker methods — emphasize ethics and defense.';
+    }
+    return 'Good summary. Add a brief example or step to improve clarity.';
+  }
+
+  // Gemini mode - use stored key (user provided)
+  const key = (localStorage.getItem('suleiman_gemini_key') || '').trim();
+  if(!key) return 'Gemini key not provided. Please save your key in Settings or use Simulated mode.';
+
+  // Example of a generic request to a Gemini-like REST endpoint.
+  // WARNING: This is a template. The actual Gemini REST endpoint, payload, and URL may change.
+  // You might need to adapt to the exact endpoint your Gemini key requires.
+  try {
+    // Template endpoint used by Google GenAI REST (may require adjustment).
+    const endpoint = 'https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText';
+    const body = {
+      // model-specific fields differ between providers; adjust as necessary.
+      "prompt": { "text": prompt },
+      "temperature": 0.2,
+      "maxOutputTokens": 240
+    };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // using API key header or bearer depends on provider: many Google GenAI endpoints use key in URL or Authorization Bearer
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    if(!res.ok){
+      // try fallback: maybe the provider expects apiKey as query param
+      const txt = await res.text();
+      console.warn('Gemini request failed:', res.status, txt);
+      return 'Gemini request failed (check key / CORS). Using simulated answer instead.';
+    }
+    const j = await res.json();
+    // The response shape can vary — try to find a human text piece
+    const out = (j?.candidates?.[0]?.content) || j?.content?.[0]?.text || j?.output?.[0]?.content || JSON.stringify(j);
+    // keep the answer short and stepwise
+    return (typeof out === 'string' && out.length>0) ? out.slice(0,800) : JSON.stringify(out).slice(0,800);
+  } catch (err) {
+    console.error('Gemini fetch error',err);
+    return 'Error calling Gemini (CORS or endpoint issue). Use simulated mode or set up server proxy.';
+  }
+}
+
+/* ---------- helpers to show/hide sections ---------- */
+function showSection(id){
+  ['catalog','courseView','myWork','forum'].forEach(k=>{ const el = document.getElementById(k); if(el) el.classList.add('hidden'); });
+  const el = document.getElementById(id);
+  if(el) el.classList.remove('hidden');
+}
+
+/* ---------- navigation events ---------- */
+btnCatalog.onclick = ()=> { renderCatalog(); showSection('catalog'); };
+btnMyWork.onclick = ()=> { renderSubmissions(); showSection('myWork'); };
+btnForum.onclick = ()=> { renderForum(); showSection('forum'); };
+btnSettings.onclick = ()=> { showSection('catalog'); /* keep catalog visible and settings are on right */ };
+
+/* ---------- save / load gemini key ---------- */
+saveKeyBtn.addEventListener('click', ()=>{
+  const val = geminiKeyInput.value.trim();
+  if(!val){ alert('Enter a key to save or press Cancel'); return; }
+  localStorage.setItem('suleiman_gemini_key', val);
+  alert('Gemini key saved locally. Reminder: client-side keys are visible to anyone who inspects the site.');
 });
 
-/* initial UI */
+/* ---------- initial run ---------- */
 renderCatalog();
 renderSubmissions();
 renderForum();
-showAssistantPanel();
+startAssistant();
 
-/* service worker registration (PWA) */
+/* register service worker (optional but harmless if you add sw.js later) */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{ /* ignore */ });
-        }
+}
