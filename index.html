@@ -4,103 +4,98 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Suleiman Cyber System</title>
-  <meta name="theme-color" content="#0e7b6b">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#033f63" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="app">
+  <div id="app" class="dark">
     <header class="topbar">
       <div class="brand">
         <div class="logo">🛡️</div>
-        <div>
+        <div class="brand-text">
           <h1>SULEIMAN CYBER SYSTEM</h1>
-          <p class="sub">Cybersecurity & Ethical Hacking — Learn step-by-step with an AI assistant</p>
+          <div class="sub">Cybersecurity & Ethical Hacking — Learn step-by-step with AI</div>
         </div>
       </div>
-      <nav>
-        <button id="btnCatalog">Catalog</button>
-        <button id="btnMyWork">My Work</button>
-        <button id="btnForum">Community</button>
-        <button id="btnSettings">Settings</button>
+      <nav class="nav">
+        <button id="btnCatalog" class="nav-btn">Catalog</button>
+        <button id="btnMyWork" class="nav-btn">My Work</button>
+        <button id="btnForum" class="nav-btn">Community</button>
+        <button id="btnSettings" class="nav-btn">Settings</button>
       </nav>
     </header>
 
-    <main id="main">
-      <!-- Assistant panel (stepwise) -->
-      <aside id="assistant" class="assistant card">
-        <div id="assistantMessages" class="assistant-messages">
-          <!-- messages inserted here -->
-        </div>
-        <div id="assistantControls" class="assistant-controls">
-          <!-- controls inserted here -->
-        </div>
-      </aside>
+    <main class="main">
+      <section class="left">
+        <!-- Assistant (main conversation area) -->
+        <div id="assistantPanel" class="card assistant">
+          <div id="chatWindow" class="chat-window" aria-live="polite"></div>
 
-      <!-- Welcome -->
-      <div id="welcomeCard" class="card center">
-        <h2>Welcome to Suleiman Cyber System</h2>
-        <p id="welcomeQuestion">Are you a beginner or do you have prior knowledge in cybersecurity?</p>
-        <div class="row">
-          <button class="pill" data-level="beginner">Beginner</button>
-          <button class="pill" data-level="intermediate">Some knowledge</button>
-          <button class="pill" data-level="advanced">Advanced</button>
-        </div>
-        <div class="muted">The assistant will guide you step-by-step. You decide when to continue.</div>
-      </div>
-
-      <!-- Catalog -->
-      <section id="catalog" class="hidden">
-        <h2>Course Catalog</h2>
-        <div id="coursesGrid" class="grid"></div>
-      </section>
-
-      <!-- Course viewer -->
-      <section id="courseView" class="hidden">
-        <button id="backToCatalog" class="link">← Back to Catalog</button>
-        <div id="courseContent"></div>
-      </section>
-
-      <!-- My Work -->
-      <section id="myWork" class="hidden">
-        <h2>My Work & Certificates</h2>
-        <div id="submissionsList"></div>
-        <div id="certList"></div>
-      </section>
-
-      <!-- Forum -->
-      <section id="forum" class="hidden">
-        <h2>Community Forum</h2>
-        <div id="forumForm">
-          <input id="forumName" placeholder="Your name (or anonymous)" />
-          <textarea id="forumMsg" placeholder="Write a message / question..."></textarea>
-          <button id="postMsg">Post</button>
-        </div>
-        <div id="forumList"></div>
-      </section>
-
-      <!-- Settings -->
-      <section id="settings" class="hidden">
-        <h2>Settings</h2>
-        <div class="card">
-          <label>AI Mode (simulated):</label>
-          <select id="aiMode">
-            <option value="sim">Simulated (default)</option>
-            <option value="api">Use External AI (needs key)</option>
-          </select>
-          <div id="apiKeyRow" class="hidden">
-            <input id="aiKey" placeholder="Paste your AI API key here (saved locally)" />
-            <button id="saveKey">Save key</button>
+          <div id="controls" class="controls">
+            <!-- dynamic controls go here (buttons / input) -->
           </div>
         </div>
+
+        <!-- Catalog / content (hidden or shown by nav) -->
+        <div id="catalog" class="card hidden">
+          <h2>Course Catalog</h2>
+          <div id="coursesGrid" class="grid"></div>
+        </div>
+
+        <div id="courseView" class="card hidden">
+          <button id="backToCatalog" class="link">← Back</button>
+          <div id="courseContent"></div>
+        </div>
+
+        <div id="myWork" class="card hidden">
+          <h2>My Work & Certificates</h2>
+          <div id="submissionsList"></div>
+          <div id="certList"></div>
+        </div>
+
+        <div id="forum" class="card hidden">
+          <h2>Community Forum</h2>
+          <div id="forumForm">
+            <input id="forumName" placeholder="Your name (optional)" />
+            <textarea id="forumMsg" placeholder="Ask or share something..."></textarea>
+            <button id="postMsg" class="btn">Post</button>
+          </div>
+          <div id="forumList"></div>
+        </div>
       </section>
+
+      <aside class="right">
+        <div class="card info">
+          <h3>Quick Info</h3>
+          <p>AI assistant guides you step-by-step. Nothing advances until you confirm.</p>
+          <p>Contact: <a href="mailto:sulleyalhassan.178.as@gmail.com">sulleyalhassan.178.as@gmail.com</a></p>
+          <p>WhatsApp: <a href="https://wa.me/233599931348" target="_blank">+233599931348</a></p>
+        </div>
+
+        <div class="card settings" id="settingsCard">
+          <h3>Settings & Gemini Key</h3>
+          <label>AI Mode</label>
+          <select id="aiMode">
+            <option value="sim">Simulated (safe)</option>
+            <option value="gemini">Gemini (client key)</option>
+          </select>
+
+          <label class="small">Paste Gemini API key (client-side)</label>
+          <input id="geminiKey" placeholder="Paste Gemini key here (client-side)" />
+          <button id="saveKey" class="btn">Save Key (local)</button>
+
+          <div class="warning">
+            ⚠️ <strong>Security note:</strong> Putting the API key in the browser exposes it to anyone who inspects the site. For production, use a server-side proxy.
+          </div>
+        </div>
+      </aside>
     </main>
 
     <footer class="footer">
-      <small>© 2025 Suleiman Cyber System — Powered by Suleiman Alhassan — Contact: <a href="mailto:sulleyalhassan.178.as@gmail.com">sulleyalhassan.178.as@gmail.com</a></small>
+      <small>© 2025 SULEIMAN CYBER SYSTEM — Powered by Suleiman Alhassan</small>
     </footer>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <script src="app.js" type="module"></script>
 </body>
-            </html>
+      </html>
