@@ -1,0 +1,47 @@
+:root{
+  --bg:#f4fbfa; --card:#fff; --accent:#0e7b6b; --muted:#557;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+html,body,#app{height:100%}
+body{background:linear-gradient(180deg,#e8f7f6,#f4fbfa);color:#073a36}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--accent);color:#fff}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--accent);font-weight:700}
+.topbar nav button{margin-left:8px;padding:8px 10px;border-radius:8px;border:none;background:rgba(255,255,255,0.12);color:#fff;cursor:pointer}
+.main{padding:18px;max-width:1000px;margin:10px auto;display:grid;grid-template-columns:1fr 360px;gap:14px}
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 20px rgba(10,20,20,0.06)}
+.center{text-align:center}
+.row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.pill{padding:10px 16px;border-radius:999px;border:1px solid rgba(0,0,0,0.06);background:linear-gradient(180deg,#fff,#f5fffb);cursor:pointer}
+.hidden{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:12px}
+.book{background:linear-gradient(180deg,#fff,#f7fffd);padding:12px;border-radius:12px;border:1px solid rgba(10,20,20,0.03);display:flex;flex-direction:column;gap:8px}
+.book h3{margin:0;color:var(--accent)}
+.book p{font-size:14px;color:var(--muted)}
+.book .openBtn{margin-top:auto;padding:8px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+.link{background:none;border:none;color:var(--accent);cursor:pointer;padding:6px 0;margin-bottom:10px}
+.lesson{margin-top:12px}
+.lesson h4{margin-bottom:8px}
+.homework{margin-top:12px}
+.homework textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #ddd}
+.homework button{margin-top:8px;padding:10px;border-radius:8px;border:none;background:#0e7b6b;color:#fff;cursor:pointer}
+.muted{color:var(--muted);font-size:14px}
+.statusOk{color:green;font-weight:700}
+.forum-entry{background:#fff;padding:10px;border-radius:10px;margin-top:10px;border-left:4px solid var(--accent)}
+footer.footer{text-align:center;padding:12px;margin-top:14px;color:#234}
+
+/* Assistant panel */
+.assistant{height:fit-content;position:sticky;top:14px}
+.assistant-messages{max-height:360px;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:10px}
+.assistant-msg{background:linear-gradient(180deg,#e9fffb,#ffffff);padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);color:#023}
+.assistant-msg.ai{background:#002f2b;color:#dff8f1;border-left:4px solid var(--accent)}
+.assistant-msg.user{align-self:flex-end;background:#eef6f5;color:#023}
+.assistant-controls{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.btn-ghost{padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer}
+.btn-primary{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+
+/* responsive */
+@media(max-width:920px){
+  .main{grid-template-columns:1fr}
+  .assistant{order:-1}
+  }
